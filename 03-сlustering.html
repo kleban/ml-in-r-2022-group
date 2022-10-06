@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.1.251">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Архипова Анастасія, Палієнко Ірина">
+<meta name="dcterms.date" content="2022-10-06">
+
+<title>Групові проєкти з курсу "Прикладне математичне моделювання в R" - 2&nbsp; Clustering: теорія та пакети R</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1.6em;
+  vertical-align: middle;
+}
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { color: #008000; } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { color: #008000; font-weight: bold; } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./02-pca.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "sidebar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "start",
+  "type": "textbox",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit"
+  }
+}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" integrity="sha512-c3Nl8+7g4LMSTdrm621y7kf9v3SDPnhxLNhcjFJbKECVnmZHTdo+IRO05sNLTH/D3vA6u1X32ehoLC7WFVdheg==" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js" integrity="sha512-bLT0Qm9VnAYZDflyKcBaQ2gg0hSYNQrJ8RilYldYQ1FxQYoCLtUjuuRuZo+fjqhx/qtq/1itJ0C2ejDxltZVFg==" crossorigin="anonymous"></script>
+<script type="application/javascript">define('jquery', [],function() {return window.jQuery;})</script>
+
+
+<link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="nav-sidebar floating">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+  <nav class="quarto-secondary-nav" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+    <div class="container-fluid d-flex justify-content-between">
+      <h1 class="quarto-secondary-nav-title"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering: теорія та пакети R</span></h1>
+      <button type="button" class="quarto-btn-toggle btn" aria-label="Show secondary navigation">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse sidebar-navigation floating overflow-auto">
+    <div class="pt-lg-2 mt-2 text-left sidebar-header">
+    <div class="sidebar-title mb-0 py-0">
+      <a href="./">Групові проєкти з курсу "Прикладне математичне моделювання в R"</a> 
+        <div class="sidebar-tools-main">
+    <a href="https://github.com/kleban/ml-in-r-2022-group/" title="Source Code" class="sidebar-tool px-1"><i class="bi bi-github"></i></a>
+    <a href="" title="Share" id="sidebar-tool-dropdown-0" class="sidebar-tool dropdown-toggle px-1" data-bs-toggle="dropdown" aria-expanded="false"><i class="bi bi-share"></i></a>
+    <ul class="dropdown-menu" aria-labelledby="sidebar-tool-dropdown-0">
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://twitter.com/intent/tweet?url=|url|">
+            <i class="bi bi-bi-twitter pe-1"></i>
+          Twitter
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.facebook.com/sharer/sharer.php?u=|url|">
+            <i class="bi bi-bi-facebook pe-1"></i>
+          Facebook
+          </a>
+        </li>
+        <li>
+          <a class="dropdown-item sidebar-tools-main-item" href="https://www.linkedin.com/sharing/share-offsite/?url=|url|">
+            <i class="bi bi-bi-linkedin pe-1"></i>
+          LinkedIn
+          </a>
+        </li>
+    </ul>
+</div>
+    </div>
+      </div>
+      <div class="mt-2 flex-shrink-0 align-items-center">
+        <div class="sidebar-search">
+        <div id="quarto-search" class="" title="Search"></div>
+        </div>
+      </div>
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">Про курс</a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./02-pca.html" class="sidebar-item-text sidebar-link"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Principal Component Analysis (in R)</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./03-сlustering.html" class="sidebar-item-text sidebar-link active"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering: теорія та пакети R</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Зміст</h2>
+   
+  <ul>
+  <li><a href="#мета-проєкту" id="toc-мета-проєкту" class="nav-link active" data-scroll-target="#мета-проєкту"><span class="toc-section-number">2.1</span>  Мета проєкту</a></li>
+  <li><a href="#теоретична-частина" id="toc-теоретична-частина" class="nav-link" data-scroll-target="#теоретична-частина"><span class="toc-section-number">2.2</span>  Теоретична частина</a></li>
+  <li><a href="#практична-частина" id="toc-практична-частина" class="nav-link" data-scroll-target="#практична-частина"><span class="toc-section-number">2.3</span>  Практична частина</a></li>
+  <li><a href="#висновки-по-темі" id="toc-висновки-по-темі" class="nav-link" data-scroll-target="#висновки-по-темі"><span class="toc-section-number">3</span>  Висновки по темі</a></li>
+  </ul>
+</nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title d-none d-lg-block"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">Clustering: теорія та пакети R</span></h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Виконали(в/ла)</div>
+    <div class="quarto-title-meta-contents">
+             <p>Архипова Анастасія, Палієнко Ірина </p>
+          </div>
+  </div>
+    
+    <div>
+    <div class="quarto-title-meta-heading">Опубліковано</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">October 6, 2022</p>
+    </div>
+  </div>
+    
+  </div>
+  
+
+</header>
+
+<p><strong>Груповий проєкт з курсу “Прикладне математичне моделювання в програмуванні”</strong></p>
+<p><strong>Інформація про виконавців</strong></p>
+<p><strong>ПІБ</strong>: Архипова Анастасія Ігорівна та Палієнко Ірина Миколаївна.</p>
+<p><strong>Курс</strong>: 3.</p>
+<p><strong>Спеціальність</strong>: Економічна кібернетика.</p>
+<p><strong>Кафедра</strong>: кафедра економіко-математичного моделювання та інформаційних технологій.</p>
+<p><strong>Факультет</strong>: Економічний факультет Національного університету “Острозька академія”.</p>
+<hr>
+<section id="мета-проєкту" class="level2" data-number="2.1">
+<h2 data-number="2.1" class="anchored" data-anchor-id="мета-проєкту"><span class="header-section-number">2.1</span> Мета проєкту</h2>
+<p>Метою проєкту є теоретичне вивчення та практичне застосування алгоритмів з прикладного математичного моделювання в R. Також розвиток теоретичних та практичних навичок по темі клатеризування за допомогою програмного середовища R.</p>
+</section>
+<section id="теоретична-частина" class="level2" data-number="2.2">
+<h2 data-number="2.2" class="anchored" data-anchor-id="теоретична-частина"><span class="header-section-number">2.2</span> Теоретична частина</h2>
+<p><strong>Кластерний аналіз</strong></p>
+<p>Це статистичний метод обробки даних. Він працює, організовуючи елементи в групи або кластери на основі того, наскільки тісно вони пов’язані. Коротко кажучи, це один з методів класифікації, який використовуються в машинному навчанні.</p>
+<p>У кластеризації або кластерному аналізі в R ми намагаємося згрупувати об’єкти зі схожими ознаками та особливостями, щоб більший набір об’єктів розділився на менші.</p>
+<p><strong>Найпоширенішим використанням кластерного аналізу є класифікація.</strong> Суб’єкти поділяються на групи так, щоб кожен суб’єкт був більш схожий на інші суб’єкти у своїй групі, ніж на ті, що поза групою.</p>
+<hr>
+<p><strong>Де можна використовувати кластерний аналіз</strong></p>
+<p>У контексті дослідження ринку це можна використовувати для визначення таких категорій, як вікові групи, розміри доходів, міське, сільське чи приміське розташування.</p>
+<ol type="1">
+<li><p>У <strong>маркетингу</strong> кластерний аналіз можна використовувати для сегментації аудиторії, щоб на різні групи клієнтів можна було націлити найбільш відповідні повідомлення.</p></li>
+<li><p>Дослідники <strong>в галузі охорони здоров’я</strong> можуть використовувати кластерний аналіз, щоб з’ясувати, чи пов’язані різні географічні області з високим або низьким рівнем певних захворювань, щоб вони могли досліджувати можливі місцеві фактори, що сприяють проблемам зі здоров’ям.</p></li>
+<li><p><strong>Ідентифікація фейкових новин</strong>. Алгоритми кластеризації допомагають зіставляти новини, факти та поради з перевіреними джерелами та класифікувати їх як правду, напівправду та брехню.</p></li>
+<li><p><strong>Спам-фільтри</strong>. Спам-фільтри є класичним прикладом класифікаційних моделей. Вони класифікують електронні листи та повідомлення як важливі та спам на основі вмісту всередині них.</p></li>
+</ol>
+<p>Якою б не була програма, очищення даних є важливим підготовчим кроком для успішного кластерного аналізу. Кластеризація працює на рівні набору даних, де кожна точка оцінюється відносно інших, тому дані мають бути якомога повнішими.</p>
+<p>Кластеризація вимірюється за допомогою <strong>внутрішньокластерної</strong> та <strong>міжкластерної відстані</strong>.</p>
+<ol type="1">
+<li><strong>Внутрішньокластерна відстань</strong> — це відстань між точками даних усередині кластера.</li>
+<li><strong>Міжкластерна відстань</strong> — це відстань між точками даних у різних кластерах.</li>
+</ol>
+<hr>
+<p><strong>Типи R-алгоритмів кластеризації</strong></p>
+<p>Існує понад 100 доступних алгоритмів кластеризації, і всі вони відрізняються один від одного багатьма різними аспектами. Класифікувати ці алгоритми нелегко, але їх можна розділити на чотири категорії.</p>
+<p><strong>1. Моделі зв’язності</strong></p>
+<p>Моделі на основі зв’язності класифікують точки даних у кластери на основі відстані між ними. Основний принцип цих моделей полягає в тому, що об’єкти, які знаходяться ближче один до одного, ймовірно, будуть більш схожими один на одного, ніж об’єкти, які знаходяться далі.</p>
+<p>Моделі зв’язності можуть мати два різних підходи. Перший полягає в тому, щоб розділити всі точки на кластери, а потім об’єднати їх по мірі збільшення відстані. Другий підхід полягає в тому, щоб об’єднати всі точки в один кластер, а потім розділити їх на окремі кластери по мірі збільшення відстані. Міра відстані також може відрізнятися від алгоритму до алгоритму.</p>
+<p><strong>2. Центроїдні моделі</strong></p>
+<p><strong>Центроїдні моделі</strong> - це ітеративні(1) алгоритми кластеризації (в яких поняття подібності виводиться з того, наскільки близька точка даних до центроїда кластера). Тобто їх ідея схожості виводиться з відстані від центроїда кластера. Ці алгоритми вимагають попереднього визначення кількості кластерів. З кожною ітерацією вони коректують положення центроїда кластерів, а також коригують класифікацію кожної точки даних.</p>
+<ol type="1">
+<li><strong>Ітера́ція</strong> - повторне застосування математичної операції (із зміненими даними) при розв’язанні обчислювальних задач, яке дає можливість поступово наблизитися до правильного результату./ Результат багаторазового повторення якоїсь математичної операції.</li>
+</ol>
+<p><strong>3. Моделі розподілу</strong></p>
+<p>Моделі розподілу відрізняються від інших типів алгоритмів кластеризації тим, що вони розглядають ймовірність належності точки даних до певного кластеру замість будь-якої міри відстані. Ці моделі часто страждають від надмірного перенавантаження.</p>
+<p><strong>4. Моделі щільності</strong></p>
+<p>Моделі щільності враховують щільність точок у різних частинах простору для створення кластерів у підпросторах з однаковою щільністю. Вони виділяють різні підпростори на основі щільності точок даних, присутніх у них, і призначають точки даних окремим кластерам.</p>
+<p><strong>Пакети для кластеризації</strong></p>
+<ol type="1">
+<li><strong>cluster</strong> - пакет, що містить в собі різні методи для кластеризації даних.</li>
+<li><strong>stats</strong> - базовий пакет, що має достатню кліькітсь функцій та методів для кластеризації.</li>
+<li><strong>ClusterR</strong>.</li>
+<li><strong>clusterSim</strong> - пакет, що допомагає підібрати оптимальну процедуру кластеризації для певного датасету.</li>
+</ol>
+<hr>
+</section>
+<section id="практична-частина" class="level2" data-number="2.3">
+<h2 data-number="2.3" class="anchored" data-anchor-id="практична-частина"><span class="header-section-number">2.3</span> Практична частина</h2>
+<p><strong>Огляд даних</strong></p>
+<p>Для початку зчитаємо набір даних, з яким ми будемо працювати і глянемо на його структуру. Він містить інформацію про комунальні послуги в різних компаніях.</p>
+<div class="cell" data-execution_count="1">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>utilities <span class="ot">&lt;-</span> <span class="fu">read.csv</span>(<span class="st">"data/utilities.csv"</span>)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">str</span>(utilities)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>'data.frame':   22 obs. of  9 variables:
+ $ Company     : chr  "Arizona " "Boston " "Central " "Commonwealth" ...
+ $ Fixed_charge: num  1.06 0.89 1.43 1.02 1.49 1.32 1.22 1.1 1.34 1.12 ...
+ $ RoR         : num  9.2 10.3 15.4 11.2 8.8 13.5 12.2 9.2 13 12.4 ...
+ $ Cost        : int  151 202 113 168 192 111 175 245 168 197 ...
+ $ Load        : num  54.4 57.9 53 56 51.2 60 67.6 57 60.4 53 ...
+ $ D.Demand    : num  1.6 2.2 3.4 0.3 1 -2.2 2.2 3.3 7.2 2.7 ...
+ $ Sales       : int  9077 5088 9212 6423 3300 11127 7642 13082 8406 6455 ...
+ $ Nuclear     : num  0 25.3 0 34.3 15.6 22.5 0 0 0 39.2 ...
+ $ Fuel_Cost   : num  0.628 1.555 1.058 0.7 2.044 ...</code></pre>
+</div>
+</div>
+<p>Побудуємо схему розсіювання вартості палива(Fuel_Cost) до продажів(Sales).</p>
+<div class="cell" data-execution_count="2">
+<div class="sourceCode cell-code" id="cb3"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Fuel_Cost <span class="sc">~</span> Sales, utilities)</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="fu">with</span>(utilities, <span class="fu">text</span>(Fuel_Cost <span class="sc">~</span> Sales, <span class="at">labels =</span> Company, <span class="at">pos =</span> <span class="dv">4</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="03-сlustering_files/figure-html/cell-3-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<p>Бачимо, що в 4 компаніях наявні високі показники продажів, але низькі показники вартості палива. Є компанії всередині, що мають помірні показники вартості палива та продажів. І є компанії з низькими значеннями продажів, але високою вартістю палива. Тобто, ми можемо розділити загальну схему на 3 групи (кластери), які будуть базуватись лише на 2 змінних.</p>
+<p><strong>Нормалізація даних</strong></p>
+<p>Варто пам’ятати, що для кластерного аналізу нам потрібні лише числові змінні, тому ми маємо прибрати першу змінну.</p>
+<div class="cell" data-execution_count="3">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>newUtilities <span class="ot">&lt;-</span> utilities[,<span class="sc">-</span><span class="fu">c</span>(<span class="dv">1</span>,<span class="dv">1</span>)]</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(newUtilities)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+
+<table class="dataframe table table-sm table-striped">
+<caption>A data.frame: 6 × 8</caption>
+<thead>
+    <tr><th></th><th scope="col">Fixed_charge</th><th scope="col">RoR</th><th scope="col">Cost</th><th scope="col">Load</th><th scope="col">D.Demand</th><th scope="col">Sales</th><th scope="col">Nuclear</th><th scope="col">Fuel_Cost</th></tr>
+    <tr><th></th><th scope="col">&lt;dbl&gt;</th><th scope="col">&lt;dbl&gt;</th><th scope="col">&lt;int&gt;</th><th scope="col">&lt;dbl&gt;</th><th scope="col">&lt;dbl&gt;</th><th scope="col">&lt;int&gt;</th><th scope="col">&lt;dbl&gt;</th><th scope="col">&lt;dbl&gt;</th></tr>
+</thead>
+<tbody>
+    <tr><th scope="row">1</th><td>1.06</td><td> 9.2</td><td>151</td><td>54.4</td><td> 1.6</td><td> 9077</td><td> 0.0</td><td>0.628</td></tr>
+    <tr><th scope="row">2</th><td>0.89</td><td>10.3</td><td>202</td><td>57.9</td><td> 2.2</td><td> 5088</td><td>25.3</td><td>1.555</td></tr>
+    <tr><th scope="row">3</th><td>1.43</td><td>15.4</td><td>113</td><td>53.0</td><td> 3.4</td><td> 9212</td><td> 0.0</td><td>1.058</td></tr>
+    <tr><th scope="row">4</th><td>1.02</td><td>11.2</td><td>168</td><td>56.0</td><td> 0.3</td><td> 6423</td><td>34.3</td><td>0.700</td></tr>
+    <tr><th scope="row">5</th><td>1.49</td><td> 8.8</td><td>192</td><td>51.2</td><td> 1.0</td><td> 3300</td><td>15.6</td><td>2.044</td></tr>
+    <tr><th scope="row">6</th><td>1.32</td><td>13.5</td><td>111</td><td>60.0</td><td>-2.2</td><td>11127</td><td>22.5</td><td>1.241</td></tr>
+</tbody>
+</table>
+</div>
+</div>
+<p>Бачимо, що деякі змінні як Nuclear та Fuel_Cost мають дуже низькі показники на відміну від Sales. Це може зіграти погану роль, адже більші показники будуть домінувати, тому потрібно нормалізувати набір даних, аби середнє значення стало 0, а стандартна похибка приблизно дорівнювала 1.</p>
+<div class="cell" data-execution_count="8">
+<div class="sourceCode cell-code" id="cb5"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a>meanUtilities <span class="ot">&lt;-</span> <span class="fu">apply</span>(newUtilities, <span class="dv">2</span>, mean)</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(meanUtilities)</span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>sdUtilities <span class="ot">&lt;-</span> <span class="fu">apply</span>(newUtilities, <span class="dv">2</span>, sd)</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(sdUtilities)</span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>newUtilities <span class="ot">&lt;-</span> <span class="fu">scale</span>(newUtilities, mean, sd)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(newUtilities)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<style>
+.dl-inline {width: auto; margin:0; padding: 0}
+.dl-inline>dt, .dl-inline>dd {float: none; width: auto; display: inline-block}
+.dl-inline>dt::after {content: ":\0020"; padding-right: .5ex}
+.dl-inline>dt:not(:first-of-type) {padding-left: .5ex}
+</style><dl class="dl-inline"><dt>Fixed_charge</dt><dd>1.11409090909091</dd><dt>RoR</dt><dd>10.7363636363636</dd><dt>Cost</dt><dd>168.181818181818</dd><dt>Load</dt><dd>56.9772727272727</dd><dt>D.Demand</dt><dd>3.24090909090909</dd><dt>Sales</dt><dd>8914.04545454545</dd></dl>
+</div>
+<div class="cell-output cell-output-display">
+<style>
+.dl-inline {width: auto; margin:0; padding: 0}
+.dl-inline>dt, .dl-inline>dd {float: none; width: auto; display: inline-block}
+.dl-inline>dt::after {content: ":\0020"; padding-right: .5ex}
+.dl-inline>dt:not(:first-of-type) {padding-left: .5ex}
+</style><dl class="dl-inline"><dt>Fixed_charge</dt><dd>0.184511171191265</dd><dt>RoR</dt><dd>2.24404937016938</dd><dt>Cost</dt><dd>41.1913494890283</dd><dt>Load</dt><dd>4.46114781495075</dd><dt>D.Demand</dt><dd>3.11825028637613</dd><dt>Sales</dt><dd>3549.984030511</dd></dl>
+</div>
+<div class="cell-output cell-output-error">
+<pre><code>ERROR: Error in as.numeric(center): cannot coerce type 'closure' to vector of type 'double'</code></pre>
+</div>
+</div>
+<p>Після цього ми можемо обрахувати так звану Евклідову відстань (довжину між 2 точками).</p>
+<div class="cell" data-execution_count="6">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a>distance <span class="ot">&lt;-</span> <span class="fu">dist</span>(newUtilities)</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(distance, <span class="at">digits =</span> <span class="dv">3</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>         1       2       3       4       5       6       7       8       9
+2   3989.4                                                                
+3    140.4  4125.0                                                        
+4   2654.3  1335.5  2789.8                                                
+5   5777.2  1788.1  5912.6  3123.2                                        
+6   2050.5  6039.7  1915.2  4704.4  7827.4                                
+7   1435.3  2554.3  1571.3  1219.6  4342.1  3485.7                        
+8   4006.1  7994.2  3872.3  6659.5  9782.2  1959.7  5440.5                
+9    671.3  3318.3   807.9  1983.3  5106.1  2721.7   764.1  4676.6        
+10  2622.7  1367.1  2758.6    43.6  3155.1  4672.8  1187.9  6627.3  1951.6
+11  8364.0 12353.1  8229.2 11018.1 14141.0  6314.4  9799.0  4359.6  9035.0
+12  2923.1  1066.6  3058.7   271.5  2854.1  4973.5  1488.0  6928.3  2252.0
+13  1899.3  2091.2  2035.4   756.8  3879.2  3949.1   466.6  5903.4  1228.4
+14   598.6  4586.3   461.3  3251.0  6373.7  1454.3  2032.6  3412.3  1269.1
+15  2609.0  1380.7  2744.5    56.6  3168.2  4659.4  1174.1  6614.5  1938.0
+16  6914.7 10903.1  6780.4  9568.4 12691.2  4866.1  8349.4  2909.0  7585.5
+17  3363.1   629.8  3498.1   710.3  2414.7  5413.1  1928.4  7368.8  2692.2
+18  1063.0  5052.3   928.7  3717.2  6840.2   988.0  2498.1  2943.5  1734.1
+19  4430.3  8419.6  4295.0  7084.4 10207.4  2380.1  5865.4   447.8  5101.4
+20  1790.5  2199.7  1925.8   864.3  3987.3  3840.2   358.5  5796.0  1119.9
+21  2427.6  1562.2  2563.6   232.5  3350.1  4478.0   992.5  6432.1  1756.4
+22  1016.6  5005.1   883.5  3670.0  6793.0  1036.0  2451.2  2990.0  1687.2
+        10      11      12      13      14      15      16      17      18
+2                                                                         
+3                                                                         
+4                                                                         
+5                                                                         
+6                                                                         
+7                                                                         
+8                                                                         
+9                                                                         
+10                                                                        
+11 10986.1                                                                
+12   304.3 11287.0                                                        
+13   724.1 10262.2  1026.5                                                
+14  3219.8  7768.4  3520.0  2496.6                                        
+15    53.3 10973.0   314.4   713.7  3205.7                                
+16  9536.2  1452.2  9837.3  8812.3  6319.9  9523.4                        
+17   744.3 11727.1   442.1  1467.0  3959.2   754.6 10277.7                
+18  3685.5  7301.0  3986.1  2961.8   470.2  3672.0  5851.9  4426.0        
+19  7052.7  3934.6  7353.4  6328.9  3834.0  7039.3  2488.4  7793.1  3367.3
+20   833.5 10154.1  1134.1   120.0  2386.9   820.2  8704.7  1573.4  2853.3
+21   199.2 10791.0   496.7   531.5  3025.0   186.4  9341.1   938.5  3490.4
+22  3638.1  7348.0  3939.1  2914.2   428.1  3625.1  5898.6  4379.2    59.3
+        19      20      21
+2                         
+3                         
+4                         
+5                         
+6                         
+7                         
+8                         
+9                         
+10                        
+11                        
+12                        
+13                        
+14                        
+15                        
+16                        
+17                        
+18                        
+19                        
+20  6220.3                
+21  6857.7   640.8        
+22  3414.8  2806.2  3443.2</code></pre>
+</div>
+</div>
+<p>Тепер ми бачимо, наскільки далеко знаходиться одна точка відносно інших. Наприклад, 11 ряд 5 колонка - 6.46. Це означає, що 5 компанія та 11 компанія мають дуже різні показники і, можливо, входять в різні групи. Тобто, між ними мало схожого.</p>
+<hr>
+<p><strong>Ієрархічне кастеризування за допомогою дендограми</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>hcluster <span class="ot">&lt;-</span> <span class="fu">hclust</span>(distance) </span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hcluster)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Так як це ієрархічне кастеризування, то кожна компанія являє собою окремий кластер і тепер ми можемо знайти, яка є ближчою до іншої. Наприклад, компанія 10 та 13 стоять поряд. Це означає, що вони можуть бути згруповані в один кластер. Так буде продовжувати до моменту, поки всі компанії не поєднаються в один кластер. Чітко можна розгледіти 3 кластери: від 3 компанії до 20 компанії; від 11 компанії до 16 компанії; від 17 компанії до 21 компанії. Змінимо числа на назви компаній.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(hcluster, <span class="at">labels =</span> utilities<span class="sc">$</span>Company)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Тепер можемо глянути на те, скільки компаній входять в який кластер. Для прикладу, все ж зупинимось на теорії про існування 3 кластерів у цьому датасеті.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>members <span class="ot">&lt;-</span> <span class="fu">cutree</span>(hcluster, <span class="dv">3</span>)</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="fu">table</span>(members)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Бачимо, що в перший кластер входить 14 компаній, в другий - 5, в третій - 3. Тепер використаємо пакет <strong>cluster</strong>, аби візуально відобразити структуру кластерів і те, наскільки кожна змінна описує цей кластер. Бачимо, що є від’ємні значення в кластері. З цього можемо зробити висновок про те, що це можуть бути аномальні показники.</p>
+<hr>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">#install.packages("cluster")</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(cluster)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(<span class="fu">silhouette</span>(<span class="fu">cutree</span>(hcluster, <span class="dv">3</span>), distance))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><strong>K-means Clustering</strong></p>
+<p>За допомогою функції <strong>kmeans()</strong> ми можемо побудувати бажану кількість кластерів.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>kMeanCluster <span class="ot">&lt;-</span> <span class="fu">kmeans</span>(newUtilities, <span class="dv">3</span>)</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>kMeanCluster</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>В цьому варіанті маємо в першому кластері 7 компаній, в другій - 3, в третій - 12.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="fu">plot</span>(Fuel_Cost <span class="sc">~</span> Sales, utilities, <span class="at">col =</span> kMeanCluster<span class="sc">$</span>cluster)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+<p><strong>Кластеризація моделями щільності</strong></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="co"># install.packages("factoextra")</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(factoextra)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="fu">fviz_cluster</span>(kMeanCluster, <span class="at">data =</span> newUtilities)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<hr>
+</section>
+<section id="висновки-по-темі" class="level1" data-number="3">
+<h1 data-number="3"><span class="header-section-number">3</span> Висновки по темі</h1>
+<p>Отже, під час роботи в великими масивами даних в певних сферах, нам зачасту потрібно розділяти показники на групи, аби зануритись у дослідження кожної окремої групи, щоб краще зрозуміти що робить їх схожими один на одного, а що - відмінними. Кластеризація - дуже поширений процес в багатьох сферах нашого життя, адже ми постійно розділяємо якісь речі за певними категоріями.</p>
+
+
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    target: function(trigger) {
+      return trigger.previousElementSibling;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    setTimeout(function() {
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const cites = ref.parentNode.getAttribute('data-cites').split(' ');
+    tippyHover(ref, function() {
+      var popup = window.document.createElement('div');
+      cites.forEach(function(cite) {
+        var citeDiv = window.document.createElement('div');
+        citeDiv.classList.add('hanging-indent');
+        citeDiv.classList.add('csl-entry');
+        var biblioDiv = window.document.getElementById('ref-' + cite);
+        if (biblioDiv) {
+          citeDiv.innerHTML = biblioDiv.innerHTML;
+        }
+        popup.appendChild(citeDiv);
+      });
+      return popup.innerHTML;
+    });
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./02-pca.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Principal Component Analysis (in R)</span></span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+  </div>
+</nav>
+</div> <!-- /content -->
+<footer class="footer">
+  <div class="nav-footer">
+      <div class="nav-footer-center">Copyright 2022, ЕК-3</div>
+  </div>
+</footer>
+
+
+
+</body></html>

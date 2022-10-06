@@ -2,10 +2,14 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://kleban.github.io/ml-in-r-2022-group/index.html</loc>
-    <lastmod>2022-10-06T11:52:36.491Z</lastmod>
+    <lastmod>2022-10-06T12:57:34.628Z</lastmod>
   </url>
   <url>
     <loc>https://kleban.github.io/ml-in-r-2022-group/02-pca.html</loc>
-    <lastmod>2022-10-06T11:52:36.493Z</lastmod>
+    <lastmod>2022-10-06T12:57:34.628Z</lastmod>
+  </url>
+  <url>
+    <loc>https://kleban.github.io/ml-in-r-2022-group/03-сlustering.html</loc>
+    <lastmod>2022-10-06T12:57:34.628Z</lastmod>
   </url>
 </urlset>
